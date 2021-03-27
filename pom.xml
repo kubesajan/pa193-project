@@ -23,6 +23,10 @@
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
+        <sonar.projectKey>kubesajan_pa193-project</sonar.projectKey>
+        <sonar.organization>kubesajan</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
+
 
 </project>
