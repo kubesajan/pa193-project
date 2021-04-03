@@ -48,7 +48,7 @@ public class Parser {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(
-                    "files/example1.txt"));
+                    "files/example2.txt"));
             String line = reader.readLine();
             while (line != null) {
                 lines.add(line);
@@ -74,6 +74,7 @@ public class Parser {
         return startingLine;
     }
     private void parseReferences() {
+        boolean refClosed = true;
         referenceStart = findReferenceIndex();
         String reference = "";
         for(int i = referenceStart; i< lines.size(); i++) {
@@ -84,14 +85,16 @@ public class Parser {
                     reference = "";
                 }
                 reference = reference.concat(line).trim();
+                refClosed = false;
             }
-            else if (line.isBlank()) {
+            else if (line.isBlank() ) {
+                refClosed = true;
                 if (!reference.isBlank()) {
                     bibliographyLines.add(reference);
+                    reference = "";
                 }
-                return;
             }
-            else {
+            else if (!refClosed) {
                 reference = reference.concat(" ").concat(line.trim());
             }
         }
