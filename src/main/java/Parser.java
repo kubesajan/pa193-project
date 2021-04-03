@@ -29,6 +29,7 @@ public class Parser {
     private HashSet<String> rsaVersions = new HashSet<>();
     private int referenceStart;
     public static void main(String[] args) {
+        System.out.println(Character.isWhitespace(32));
         Parser parser = new Parser();
         parser.readFile();
         parser.parseReferences();
@@ -79,7 +80,6 @@ public class Parser {
         String reference = "";
         for(int i = referenceStart; i< lines.size(); i++) {
             String line = lines.get(i);
-            char temp = line.charAt(0);
             if (line.contains("[") && line.contains("]")) {
                 if (reference.length() > 0) {
                     bibliographyLines.add(reference);
@@ -95,7 +95,7 @@ public class Parser {
                     reference = "";
                 }
             }
-            else if (!refClosed && Character.isWhitespace(reference.charAt(0))) {
+            else if (!refClosed && Character.isWhitespace(line.charAt(0))) {
                 System.out.println(reference.charAt(0));
                 reference = reference.concat(" ").concat(line.trim());
             }
