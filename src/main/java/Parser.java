@@ -48,7 +48,7 @@ public class Parser {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(
-                    "files/example2.txt"));
+                    "files/NSCIB-CC-0229287(SSCDkeyImp)-STv1.2.txt"));
             String line = reader.readLine();
             while (line != null) {
                 lines.add(line);
@@ -79,6 +79,7 @@ public class Parser {
         String reference = "";
         for(int i = referenceStart; i< lines.size(); i++) {
             String line = lines.get(i);
+            char temp = line.charAt(0);
             if (line.contains("[") && line.contains("]")) {
                 if (reference.length() > 0) {
                     bibliographyLines.add(reference);
@@ -94,7 +95,8 @@ public class Parser {
                     reference = "";
                 }
             }
-            else if (!refClosed) {
+            else if (!refClosed && Character.isWhitespace(reference.charAt(0))) {
+                System.out.println(reference.charAt(0));
                 reference = reference.concat(" ").concat(line.trim());
             }
         }
