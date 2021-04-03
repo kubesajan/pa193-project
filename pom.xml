@@ -19,6 +19,12 @@
             </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version>
+        </dependency></dependencies>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>

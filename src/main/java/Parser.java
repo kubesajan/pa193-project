@@ -1,5 +1,9 @@
 
 
+import netscape.javascript.JSObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,6 +32,8 @@ public class Parser {
     private HashSet<String> eccVersions = new HashSet<>();
     private HashSet<String> rsaVersions = new HashSet<>();
     private int referenceStart;
+    private String name;
+    private JSONObject jsonObject;
     public static void main(String[] args) {
         System.out.println(Character.isWhitespace(32));
         Parser parser = new Parser();
@@ -41,6 +47,8 @@ public class Parser {
         parser.findVersions(eccOptions, parser.eccVersions);
         parser.findVersions(rsaOptions, parser.rsaVersions);
         parser.findName();
+        parser.makeJsonStructure();
+        System.out.println(parser.jsonObject.toString(4));
         System.out.println("Ahoj");
 
     }
@@ -49,7 +57,7 @@ public class Parser {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(
-                    "files/NSCIB-CC-0229287(SSCDkeyImp)-STv1.2.txt"));
+                    "files/example1.txt"));
             String line = reader.readLine();
             while (line != null) {
                 lines.add(line);
@@ -78,9 +86,18 @@ public class Parser {
         boolean refClosed = true;
         referenceStart = findReferenceIndex();
         String reference = "";
+        int noBrackets = 0;
         for(int i = referenceStart; i< lines.size(); i++) {
             String line = lines.get(i);
+            if(line.contains("•")) {
+                noBrackets = 0;
+                continue;
+            }
+            if(noBrackets >= 20) {
+                break;
+            }
             if (line.contains("[") && line.contains("]")) {
+                noBrackets= 0;
                 if (reference.length() > 0) {
                     bibliographyLines.add(reference);
                     reference = "";
@@ -90,14 +107,19 @@ public class Parser {
             }
             else if (line.isBlank() ) {
                 refClosed = true;
+                ++noBrackets;
                 if (!reference.isBlank()) {
                     bibliographyLines.add(reference);
                     reference = "";
                 }
             }
-            else if (!refClosed && Character.isWhitespace(line.charAt(0))) {
-                System.out.println(reference.charAt(0));
+            else if (!refClosed) {
                 reference = reference.concat(" ").concat(line.trim());
+                ++noBrackets;
+            }
+
+            else {
+                ++noBrackets;
             }
         }
     }
@@ -120,11 +142,38 @@ public class Parser {
             String line = lines.get(i);
             if(line.contains("Title")) {
                 line = line.replace("Title", "");
-                line = line.trim();
-                System.out.println(line);
+                name = line.trim();
                 return;
             }
         }
+    }
+    private void makeJsonStructure () {
+        JSONObject obj = new JSONObject();
+        obj.put("title", name);
+        JSONObject versions = new JSONObject();
+        versions.put("eal", ealVersions);
+        versions.put("global_platform", new JSONArray(gpVersions));
+        versions.put("java_card", new JSONArray(javaVersions));
+        versions.put("sha", new JSONArray(shaVersions));
+        versions.put("rsa", new JSONArray(rsaVersions));
+        versions.put("ecc", new JSONArray(eccVersions));
+        versions.put("des", new JSONArray(desVersions));
+        obj.put("versions", versions);
+        JSONObject bibliography = new JSONObject();
+        for (String item : bibliographyLines) {
+            String[] parsed = parseReferenceLine(item);
+            bibliography.put(parsed[0], parsed[1]);
+        }
+        obj.put("bibliography", bibliography);
+        jsonObject = obj;
+
+    }
+    private String[] parseReferenceLine(String line){
+        String[] temp = line.split("]", 2);
+        temp[1] = temp[1].trim();
+        temp[0] = temp[0].concat("]");
+        return temp;
+
     }
 
 }
