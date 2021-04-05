@@ -54,9 +54,11 @@ public class ReadWriteFile {
         File folder = new File("input");
         File[] listOfFiles = folder.listFiles();
 
-        for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile()) {
-                allFilesNames.add(listOfFiles[i].getName());
+        if (listOfFiles != null) {
+            for (File file : listOfFiles) {
+                if (file.isFile()) {
+                    allFilesNames.add(file.getName());
+                }
             }
         }
 
