@@ -41,8 +41,52 @@ public class Parser {
         findVersions(desOptions, desVersions);
         findVersions(eccOptions, eccVersions);
         findVersions(rsaOptions, rsaVersions);
+        findRevisions();
         findName();
+
         return makeJsonStructure();
+    }
+
+    private void findRevisions(){
+        String version = "";
+        String date = "";
+        String description = "";
+        int currentPage = 1;
+        int candidatePage = 0;
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            if (line.contains("\f")) {
+                currentPage++;
+            }
+            else if (line.toLowerCase().contains("rev")) {
+                candidatePage = currentPage;
+            }
+            else if ((candidatePage == currentPage) && line.contains("1.0")) {
+                while (!line.contains("\f")) {
+                    if (!line.isBlank()) {
+                        String[] splitRevision = line.split("\\s{2,100}");
+                        if (splitRevision.length == 1) {
+                            description = description.concat(splitRevision[0].trim());
+                        }
+                        else {
+                            System.out.println(version);
+                            System.out.println(date);
+                            System.out.println(description);
+                            description = splitRevision[splitRevision.length-1].trim();
+                            for (int j = 0; j < splitRevision.length - 1; j++) {
+                                if (splitRevision[j].contains("."))
+                                    version = splitRevision[j].trim();
+                                else if (splitRevision[j].contains("-"))
+                                    date = splitRevision[j].trim();
+                            }
+                        }
+                    }
+                    i++;
+                    line = lines.get(i);
+                }
+                return;
+            }
+        }
     }
 
     private void parseReferences() {
