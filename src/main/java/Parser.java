@@ -92,7 +92,7 @@ public class Parser {
                             for (int j = 0; j < splitRevision.length - 1; j++) {
                                 if (splitRevision[j].contains("."))
                                     version = splitRevision[j].trim();
-                                else if (splitRevision[j].contains("-"))
+                                else if (splitRevision[j].contains("-") || splitRevision[j].contains("/"))
                                     date = splitRevision[j].trim();
                             }
                         }
