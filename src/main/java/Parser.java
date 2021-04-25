@@ -1,3 +1,4 @@
+import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -5,15 +6,20 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 public class Parser {
     private int referenceStart;
+    private int titleProbability;
     private JSONObject jsonObject;
     private ArrayList<String> lines = new ArrayList<>();
     private ArrayList<String> revisionVersions = new ArrayList<>();
     private ArrayList<String> revisionDates = new ArrayList<>();
     private ArrayList<String> revisionDescriptions = new ArrayList<>();
     private ArrayList<String> bibliographyLines = new ArrayList<>();
+    private ArrayList<List<String>> tocLines = new ArrayList<List<String>>();
+    private ArrayList<String> headerFooterLines = new ArrayList<>();
+    private ArrayList<String> headerFooterLinesExtended = new ArrayList<>();
     private String name = "";
     private final HashSet<String> ealOptions = new HashSet<>(Arrays.asList("EAL1", "EAL 1.", "EAL1+", "EAL 1+", "EAL2", "EAL 2", "EAL2+", "EAL 2+", "EAL3", "EAL 3", "EAL3+", "EAL 3+", "EAL4", "EAL 4", "EAL4+", "EAL 4+", "EAL5", "EAL 5", "EAL5+", "EAL 5+", "EAL6", "EAL 6", "EAL6+", "EAL 6+", "EAL7", "EAL 7", "EAL7+", "EAL 7+"));
     private final HashSet<String> shaOptions = new HashSet<>(Arrays.asList("SHA1", "SHA 1", "SHA-1", "SHA224", "SHA 224", "SHA-224", "SHA256", "SHA 256", "SHA-256", "SHA384", "SHA 384", "SHA-384", "SHA512", "SHA 512", "SHA-512"));
@@ -36,6 +42,7 @@ public class Parser {
             return new JSONObject();
         }
         lines = linesFromFile;
+        findHeaderFooter();
         parseReferences();
         findVersions(ealOptions, ealVersions);
         findVersions(shaOptions, shaVersions);
@@ -46,6 +53,7 @@ public class Parser {
         findVersions(rsaOptions, rsaVersions);
         findRevisions();
         findName();
+        parseTOC();
 
         return makeJsonStructure();
     }
@@ -173,13 +181,66 @@ public class Parser {
     }
 
     private void findName() {
+        if (!name.isEmpty()) {
+            return;
+        }
+        int x = 0;
+        for (String line : lines) {
+            if (line.contains("/f")) {
+                break;
+            }
+            if (line.isEmpty()) {
+                continue;
+            }
+            if (x < 20) {
+                if (headerFooterLines.contains(line) && !name.contains(line.trim())) {
+                    if (!name.isEmpty()) {
+                        name = name.concat(" ").concat(line.trim());
+                    } else {
+                        name = name.concat(line.trim());
+                    }
+                }
+            }
+            x++;
+        }
+        if (!name.isEmpty()) {
+            return;
+        }
+        x = 0;
+        for (String line : lines) {
+            if (line.contains("/f")) {
+                break;
+            }
+            if (line.isEmpty()) {
+                continue;
+            }
+            if (x < 20) {
+                if (headerFooterLinesExtended.contains(line) && !name.contains(line.trim())) {
+                    if (!name.isEmpty()) {
+                        name = name.concat(" ").concat(line.trim());
+                    } else {
+                        name = name.concat(line.trim());
+                    }
+                }
+            }
+            x++;
+        }
+        if (!name.isEmpty()) {
+            return;
+        }
+        if (titleProbability > 4) {
+            for (int i = 0; i < headerFooterLines.size(); i++) {
+                name = name.concat(headerFooterLines.get(i).trim().concat(" "));
+            }
+            return;
+        }
+        //this part is buggy, sadly
         for (int i = 0; i < referenceStart; i++) {
             String line = lines.get(i);
             if (line.contains("Title")) {
                 line = line.replace("Title", "");
                 line = line.trim();
                 name = line;
-                return;
             }
         }
     }
@@ -196,6 +257,7 @@ public class Parser {
         versions.put("ecc", new JSONArray(eccVersions));
         versions.put("des", new JSONArray(desVersions));
         obj.put("versions", versions);
+        obj.put("table_of_contents", new JSONArray(tocLines));
         JSONArray revisions = new JSONArray();
         for (int i = 0; i < revisionVersions.size(); i++) {
             JSONObject revision = new JSONObject();
@@ -221,4 +283,105 @@ public class Parser {
         temp[0] = temp[0].concat("]");
         return temp;
     }
+    private int findTOCIndex() {
+        int startingLine = 0;
+        char ch = (char) 0;
+        for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i).toLowerCase().contains("content") && startingLine == 0) {
+                for (int j = i + 1; j < i + 3; j++) {
+                    if (lines.get(j).isEmpty()) {
+                        continue;
+                    } else {
+                        ch = lines.get(j).trim().charAt(0);
+                    }
+                    if (Character.isUpperCase(ch) || Character.isDigit(ch)) {
+                        startingLine = j;
+                        break;
+                    }
+                }
+            }
+        }
+        return startingLine;
+    }
+    private void parseTOC() {
+        int tocStart = findTOCIndex();
+        int skipped = 0;
+        for (int i = tocStart; i < lines.size(); i++) {
+            boolean needEmpty = false;
+            boolean needSpace = false;
+            if (skipped > 4) {
+                break;
+            }
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) {
+                skipped += 1;
+                continue;
+            }
+            if (headerFooterLines.contains(line) ||headerFooterLinesExtended.contains(line) || name.contains(line)) {
+                continue;
+            }
+            char ch = line.charAt(0);
+            if (!Character.isDigit(ch)){
+                if ((Character.isUpperCase(ch) && Character.isAlphabetic(line.charAt(1)))){
+                    needEmpty = true;
+                }
+            }
+            List<String> tmpList = new ArrayList<String>(Arrays.asList(line.trim().split("[.\\s+]"))); //Remove dots and spaces
+            tmpList.removeAll(Arrays.asList(""));
+            List<String> splitLine = new ArrayList<String>();
+            String tmpString = tmpList.get(0);
+            int k = 1;
+            if (needEmpty) {
+                splitLine.add("");
+                k = 0;
+                needSpace = false;
+            } else {
+                for (int j = 1; j < tmpList.size() - 1; j++) { //Join back the initial numbers.
+                    ch = tmpList.get(j).charAt(0);
+                    if (Character.isDigit(ch)){
+                        needSpace = false;
+                        tmpString = tmpString.concat(".").concat(tmpList.get(j));
+                    }
+                }
+                splitLine.add(tmpString);
+            }
+            tmpString = "";
+            while(k < tmpList.size() - 1) { //Join back text.
+                if (needSpace) {
+                    tmpString = tmpString.concat(" ");
+                }
+                String tmpLine = tmpList.get(k);
+                ch = tmpLine.charAt(0);
+                if (!Character.isDigit(ch)) {
+                    tmpString = tmpString.concat(tmpLine);
+                    needSpace = true;
+                }
+                ++k;
+            }
+            splitLine.add(tmpString);
+            splitLine.add(tmpList.get(tmpList.size()-1));
+            tocLines.add(splitLine);
+        }
+    }
+
+    private void findHeaderFooter() {
+        for (int i = 5; i < lines.size(); i++) {
+            if (lines.get(i).contains("\f")) {
+                for (int j = 0; j < 4; j++) {
+                    if (headerFooterLines.contains(lines.get(j))) {
+                        titleProbability++;
+                    } else{
+                        headerFooterLines.add(lines.get(j));
+                    }
+                }
+                for (int j = 4; j < 10; j++) {
+                    if (!headerFooterLinesExtended.contains(lines.get(j))) {
+                        headerFooterLinesExtended.add(lines.get(j));
+                    }
+                }
+            }
+        }
+    }
+
+
 }
