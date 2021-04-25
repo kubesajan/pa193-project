@@ -100,7 +100,7 @@ public class Parser {
                     i++;
                     line = lines.get(i);
                 }
-                if (!version.equals(revisionVersions.get(revisionVersions.size() - 1)) && version.length() < 6) {
+                if ((revisionVersions.size() != 0 && !version.equals(revisionVersions.get(revisionVersions.size() - 1)) ) && version.length() < 6) {
                     if (!revisionVersions.contains(version)) {
                         revisionVersions.add(version);
                         revisionDates.add(date);
