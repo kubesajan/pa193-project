@@ -10,6 +10,9 @@ public class Parser {
     private int referenceStart;
     private JSONObject jsonObject;
     private ArrayList<String> lines = new ArrayList<>();
+    private ArrayList<String> revisionVersions = new ArrayList<>();
+    private ArrayList<String> revisionDates = new ArrayList<>();
+    private ArrayList<String> revisionDescriptions = new ArrayList<>();
     private ArrayList<String> bibliographyLines = new ArrayList<>();
     private String name = "";
     private final HashSet<String> ealOptions = new HashSet<>(Arrays.asList("EAL1", "EAL 1.", "EAL1+", "EAL 1+", "EAL2", "EAL 2", "EAL2+", "EAL 2+", "EAL3", "EAL 3", "EAL3+", "EAL 3+", "EAL4", "EAL 4", "EAL4+", "EAL 4+", "EAL5", "EAL 5", "EAL5+", "EAL 5+", "EAL6", "EAL 6", "EAL6+", "EAL 6+", "EAL7", "EAL 7", "EAL7+", "EAL 7+"));
@@ -69,9 +72,14 @@ public class Parser {
                             description = description.concat(splitRevision[0].trim());
                         }
                         else {
-                            System.out.println(version);
-                            System.out.println(date);
-                            System.out.println(description);
+                            if (!version.isBlank() && version.length() < 6) {
+                                if (!revisionVersions.contains(version)) {
+                                    revisionVersions.add(version);
+                                    revisionDates.add(date);
+                                    revisionDescriptions.add(description);
+                                }
+                            }
+
                             description = splitRevision[splitRevision.length-1].trim();
                             for (int j = 0; j < splitRevision.length - 1; j++) {
                                 if (splitRevision[j].contains("."))
@@ -83,6 +91,13 @@ public class Parser {
                     }
                     i++;
                     line = lines.get(i);
+                }
+                if (!version.equals(revisionVersions.get(revisionVersions.size() - 1)) && version.length() < 6) {
+                    if (!revisionVersions.contains(version)) {
+                        revisionVersions.add(version);
+                        revisionDates.add(date);
+                        revisionDescriptions.add(description);
+                    }
                 }
                 return;
             }
@@ -181,6 +196,15 @@ public class Parser {
         versions.put("ecc", new JSONArray(eccVersions));
         versions.put("des", new JSONArray(desVersions));
         obj.put("versions", versions);
+        JSONArray revisions = new JSONArray();
+        for (int i = 0; i < revisionVersions.size(); i++) {
+            JSONObject revision = new JSONObject();
+            revision.put("version", revisionVersions.get(i));
+            revision.put("date", revisionDates.get(i));
+            revision.put("description", revisionDescriptions.get(i));
+            revisions.put(revision);
+        }
+        obj.put("revisions", revisions);
         JSONObject bibliography = new JSONObject();
         for (String item : bibliographyLines) {
             String[] parsed = parseReferenceLine(item);
