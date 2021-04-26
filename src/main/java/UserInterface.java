@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -44,7 +45,7 @@ public class UserInterface {
 
     }
 
-    public void parseAllInInputFolder() {
+    public void parseAllInInputFolder() throws IOException {
 
         if (!getFileNames()) {
             return;
@@ -57,7 +58,7 @@ public class UserInterface {
         }
     }
 
-    public void parseOneInInputFolder() {
+    public void parseOneInInputFolder() throws IOException {
         if (!getFileNames()) {
             return;
         }
@@ -78,7 +79,7 @@ public class UserInterface {
         readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, "input/"), parsingOption), nameOfFile);
     }
 
-    public void parseOneSpecifiedByPath() {
+    public void parseOneSpecifiedByPath() throws IOException {
         if (!getFileNames()) {
             return;
         }
@@ -98,7 +99,7 @@ public class UserInterface {
         readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, path), parsingOption), nameOfFile);
     }
 
-    public boolean getFileNames() {
+    public boolean getFileNames() throws IOException {
         clearConsole();
         allFilesNames = readWriteFile.getAllFilesNames();
         var wrongFilesNames = readWriteFile.wrongFilesNames();

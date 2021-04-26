@@ -1,9 +1,10 @@
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 public class ProjectMainClass {
-    public static void main(String[] args) throws JSONException {
+    public static void main(String[] args) throws JSONException, IOException {
         UserInterface ui = new UserInterface();
         int run = 1;
         int option;

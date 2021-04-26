@@ -1,8 +1,10 @@
-import org.json.JSONException;
 import org.apache.commons.io.FilenameUtils;
+import org.json.JSONException;
 
 import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
+import java.nio.file.Files;
 
 public class ReadWriteFile {
     private ArrayList<String> wrongFilesNames = new ArrayList<>();
@@ -28,16 +30,20 @@ public class ReadWriteFile {
         return lines;
     }
 
-    public void writeToFile(String obj, String nameOfFile) {
-        if (obj.isEmpty()) {
+    public void writeToFile(String jsonString, String nameOfFile) throws IOException {
+        if (jsonString.isEmpty()) {
             System.out.print("\n\nFile does not exist or is empty!\n\n");
             return;
         }
+        Path path = Paths.get("output/");
         nameOfFile = nameOfFile.replaceFirst(".txt", ".json");
         String fileLocation = "";
+        if(!Files.exists(path)) {
+            Files.createDirectory(path);
+        }
         try {
             file = new FileWriter("output/" + nameOfFile);
-            file.write(obj);
+            file.write(jsonString);
             File f = new File(nameOfFile);
             fileLocation = "File is located in: " + f.getAbsolutePath() + "\n";
         } catch (IOException | JSONException e) {
@@ -60,7 +66,11 @@ public class ReadWriteFile {
         }
     }
 
-    public ArrayList<String> getAllFilesNames() {
+    public ArrayList<String> getAllFilesNames() throws IOException {
+        Path pathInput = Paths.get("input/");
+        if(!Files.exists(pathInput)) {
+            Files.createDirectory(pathInput);
+        }
         ArrayList<String> allFilesNames = new ArrayList<>();
         File folder = new File("input");
         File[] listOfFiles = folder.listFiles();
