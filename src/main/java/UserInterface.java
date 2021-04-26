@@ -76,6 +76,7 @@ public class UserInterface {
         }
         String nameOfFile = allFilesNames.get(userInputInt - 1);
         clearConsole();
+        parser = new Parser();
         readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, "input/"), parsingOption), nameOfFile);
     }
 
@@ -95,6 +96,7 @@ public class UserInterface {
         System.out.print("\ne.g. of file path: C:/Users/computer/Desktop/ ");
         System.out.print("\nPlease specify absolut path of file: ");
         String path = getUserInputString();
+        parser = new Parser();
         readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, path), parsingOption), nameOfFile);
     }
 

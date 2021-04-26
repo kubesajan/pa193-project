@@ -31,8 +31,8 @@ public class ReadWriteFile {
         return lines;
     }
 
-    public void writeToFile(JSONObject obj, String nameOfFile) {
-        if (obj.isEmpty() || obj == null) {
+    public void writeToFile(String obj, String nameOfFile) {
+        if (obj.isEmpty()) {
             System.out.print("\n\nFile does not exist or is empty!\n\n");
             return;
         }
@@ -42,7 +42,7 @@ public class ReadWriteFile {
             file = new FileWriter("output/" + nameOfFile);
             File f = new File(nameOfFile);
             fileLocation = "File is located in: " + f.getAbsolutePath() + "\n";
-            file.write(obj.toString(4));
+            file.write(obj);
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             System.out.println("Writing to file has failed !");

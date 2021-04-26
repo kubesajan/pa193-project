@@ -37,9 +37,9 @@ public class Parser {
     private int parsingOption;
 
 
-    public JSONObject parsing(ArrayList<String> linesFromFile, int option) throws JSONException {
+    public String parsing(ArrayList<String> linesFromFile, int option) throws JSONException {
         if (linesFromFile.isEmpty()) {
-            return new JSONObject();
+            return new String();
         }
         lines = linesFromFile;
         parsingOption = option;
@@ -66,7 +66,7 @@ public class Parser {
                 break;
             default:
         }
-        return makeJsonStructure();
+        return makeJsonStructure().toString(4);
     }
 
     private void parseVersions() {
@@ -376,6 +376,9 @@ public class Parser {
             tmpList.removeAll(Arrays.asList(""));
             List<String> splitLine = new ArrayList<String>();
             String tmpString = tmpList.get(0);
+            if (!Character.isDigit(tmpList.get(tmpList.size() - 1).charAt(0))) {
+                continue;
+            }
             int k = 1;
             if (needEmpty) {
                 splitLine.add("");
