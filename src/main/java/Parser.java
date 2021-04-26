@@ -348,7 +348,7 @@ public class Parser {
         for (int i = tocStart; i < lines.size(); i++) {
             boolean needEmpty = false;
             boolean needSpace = false;
-            if (skipped > 4) {
+            if (skipped > 6) {
                 break;
             }
             String line = lines.get(i).trim();
@@ -356,7 +356,14 @@ public class Parser {
                 skipped += 1;
                 continue;
             }
-            if (headerFooterLines.contains(line) || headerFooterLinesExtended.contains(line) || name.contains(line)) {
+            if (headerFooterLines.contains(line) ||
+                headerFooterLinesExtended.contains(line) ||
+                name.contains(line) ||
+                line.contains("Page:") ||
+                line.contains("BSI-DSZ-CC") ||
+                (Character.isDigit(line.charAt(0)) && line.contains("/")) ||
+                line.contains("www"))
+            {
                 continue;
             }
             char ch = line.charAt(0);
