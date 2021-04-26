@@ -44,8 +44,8 @@ public class ReadWriteFile {
         try {
             file = new FileWriter("output/" + nameOfFile);
             file.write(jsonString);
-            File f = new File(nameOfFile);
-            fileLocation = "File is located in: " + f.getAbsolutePath() + "\n";
+            fileLocation = "File is located in: " + new File("output/" + nameOfFile).getAbsolutePath()
+            + "\n";
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             System.out.println("Writing to file has failed !");
