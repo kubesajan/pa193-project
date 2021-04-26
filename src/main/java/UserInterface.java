@@ -21,7 +21,7 @@ public class UserInterface {
 
     public void parsingOption() {
         System.out.print("\nSelect what you want to parse.\n\n");
-        System.out.print("1 - Parse everything (Title, versions, table of contents, revisions and bibliography)\n2 - Table of contents\n3 - Bibliography\n4 - Versions\n5 - Revisions\n\nRemark: Title is always parsed.\n\n");
+        System.out.print("1 - Parse everything (Title, table of contents, bibliography, versions and revisions)\n2 - Table of contents\n3 - Bibliography\n4 - Versions\n5 - Revisions\n\nRemark: Title is always parsed.\n\n");
         System.out.print("Your option: ");
         parsingOption = getUserInputInt();
         while (parsingOption < 1 || parsingOption > 5) {

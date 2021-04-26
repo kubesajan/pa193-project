@@ -10,7 +10,7 @@ import java.util.List;
 public class Parser {
     private int referenceStart;
     private int titleProbability;
-    private JSONObject jsonObject;
+    private JSONObject jsonObject = new JSONObject();
     private ArrayList<String> lines = new ArrayList<>();
     private ArrayList<String> revisionVersions = new ArrayList<>();
     private ArrayList<String> revisionDates = new ArrayList<>();
@@ -43,20 +43,33 @@ public class Parser {
         }
         lines = linesFromFile;
         parsingOption = option;
-        switch (parsingOption)
-        {
+        findHeaderFooter();
+        findName();
+        switch (parsingOption) {
             case 1:
-                parseEverything();
+                parseTOC();
+                parseBibliography();
+                parseVersions();
+                findRevisions();
+                break;
+            case 2:
+                parseTOC();
+                break;
+            case 3:
+                parseBibliography();
+                break;
+            case 4:
+                parseVersions();
+                break;
+            case 5:
+                findRevisions();
+                break;
+            default:
         }
-
         return makeJsonStructure();
     }
 
-    public void parseEverything()
-    {
-        findName();
-        findHeaderFooter();
-        parseReferences();
+    private void parseVersions() {
         findVersions(ealOptions, ealVersions);
         findVersions(shaOptions, shaVersions);
         findVersions(javaOptions, javaVersions);
@@ -64,11 +77,9 @@ public class Parser {
         findVersions(desOptions, desVersions);
         findVersions(eccOptions, eccVersions);
         findVersions(rsaOptions, rsaVersions);
-        findRevisions();
-        parseTOC();
     }
 
-    private void findRevisions(){
+    private void findRevisions() {
         String version = "";
         String date = "";
         String description = "";
@@ -78,18 +89,15 @@ public class Parser {
             String line = lines.get(i);
             if (line.contains("\f")) {
                 currentPage++;
-            }
-            else if (line.toLowerCase().contains("rev")) {
+            } else if (line.toLowerCase().contains("rev")) {
                 candidatePage = currentPage;
-            }
-            else if ((candidatePage == currentPage) && line.contains("1.0")) {
+            } else if ((candidatePage == currentPage) && line.contains("1.0")) {
                 while (!line.contains("\f")) {
                     if (!line.isBlank()) {
                         String[] splitRevision = line.split("\\s{2,100}");
                         if (splitRevision.length == 1) {
                             description = description.concat(splitRevision[0].trim());
-                        }
-                        else {
+                        } else {
                             if (!version.isBlank() && version.length() < 6) {
                                 if (!revisionVersions.contains(version)) {
                                     revisionVersions.add(version);
@@ -98,7 +106,7 @@ public class Parser {
                                 }
                             }
 
-                            description = splitRevision[splitRevision.length-1].trim();
+                            description = splitRevision[splitRevision.length - 1].trim();
                             for (int j = 0; j < splitRevision.length - 1; j++) {
                                 if (splitRevision[j].contains("."))
                                     version = splitRevision[j].trim();
@@ -110,7 +118,7 @@ public class Parser {
                     i++;
                     line = lines.get(i);
                 }
-                if ((revisionVersions.size() != 0 && !version.equals(revisionVersions.get(revisionVersions.size() - 1)) ) && version.length() < 6) {
+                if ((revisionVersions.size() != 0 && !version.equals(revisionVersions.get(revisionVersions.size() - 1))) && version.length() < 6) {
                     if (!revisionVersions.contains(version)) {
                         revisionVersions.add(version);
                         revisionDates.add(date);
@@ -122,7 +130,7 @@ public class Parser {
         }
     }
 
-    private void parseReferences() {
+    private void parseBibliography() {
         bibliographyLines = new ArrayList<>();
         boolean refClosed = true;
         referenceStart = findReferenceIndex();
@@ -177,7 +185,7 @@ public class Parser {
     }
 
     private void findVersions(HashSet<String> options, HashSet<String> found) {
-        for (int i = 0; i < referenceStart; i++) {
+        for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             for (String option : options) {
                 if (line.contains(option)) {
@@ -210,21 +218,6 @@ public class Parser {
                         name = name.concat(line.trim());
                     }
                 }
-            }
-            x++;
-        }
-        if (!name.isEmpty()) {
-            return;
-        }
-        x = 0;
-        for (String line : lines) {
-            if (line.contains("/f")) {
-                break;
-            }
-            if (line.isEmpty()) {
-                continue;
-            }
-            if (x < 20) {
                 if (headerFooterLinesExtended.contains(line) && !name.contains(line.trim())) {
                     if (!name.isEmpty()) {
                         name = name.concat(" ").concat(line.trim());
@@ -245,7 +238,7 @@ public class Parser {
             return;
         }
         //this part is buggy, sadly
-        for (int i = 0; i < referenceStart; i++) {
+        for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             if (line.contains("Title")) {
                 line = line.replace("Title", "");
@@ -256,8 +249,47 @@ public class Parser {
     }
 
     private JSONObject makeJsonStructure() throws JSONException {
-        JSONObject obj = new JSONObject();
-        obj.put("title", name);
+        jsonObject.put("title", name);
+        switch (parsingOption) {
+            case 1:
+                makeTableOfContentsJSON();
+                makeBibliographyJSON();
+                makeVersionsJSON();
+                makeRevisionsJSON();
+                break;
+            case 2:
+                makeTableOfContentsJSON();
+                break;
+            case 3:
+                makeBibliographyJSON();
+                break;
+            case 4:
+                makeVersionsJSON();
+                break;
+            case 5:
+                makeRevisionsJSON();
+                break;
+        }
+
+        return jsonObject;
+    }
+
+    private void makeTableOfContentsJSON() {
+
+        jsonObject.put("table_of_contents", new JSONArray(tocLines));
+    }
+
+    private void makeBibliographyJSON() {
+        JSONObject bibliography = new JSONObject();
+        for (String item : bibliographyLines) {
+            String[] parsed = parseReferenceLine(item);
+            bibliography.put(parsed[0], parsed[1]);
+        }
+        jsonObject.put("bibliography", bibliography);
+    }
+
+    private void makeVersionsJSON() {
+
         JSONObject versions = new JSONObject();
         versions.put("eal", ealVersions);
         versions.put("global_platform", new JSONArray(gpVersions));
@@ -266,8 +298,10 @@ public class Parser {
         versions.put("rsa", new JSONArray(rsaVersions));
         versions.put("ecc", new JSONArray(eccVersions));
         versions.put("des", new JSONArray(desVersions));
-        obj.put("versions", versions);
-        obj.put("table_of_contents", new JSONArray(tocLines));
+        jsonObject.put("versions", versions);
+    }
+
+    private void makeRevisionsJSON() {
         JSONArray revisions = new JSONArray();
         for (int i = 0; i < revisionVersions.size(); i++) {
             JSONObject revision = new JSONObject();
@@ -276,15 +310,8 @@ public class Parser {
             revision.put("description", revisionDescriptions.get(i));
             revisions.put(revision);
         }
-        obj.put("revisions", revisions);
-        JSONObject bibliography = new JSONObject();
-        for (String item : bibliographyLines) {
-            String[] parsed = parseReferenceLine(item);
-            bibliography.put(parsed[0], parsed[1]);
-        }
-        obj.put("bibliography", bibliography);
-        jsonObject = obj;
-        return jsonObject;
+        jsonObject.put("revisions", revisions);
+
     }
 
     private String[] parseReferenceLine(String line) {
@@ -293,6 +320,7 @@ public class Parser {
         temp[0] = temp[0].concat("]");
         return temp;
     }
+
     private int findTOCIndex() {
         int startingLine = 0;
         char ch = (char) 0;
@@ -313,6 +341,7 @@ public class Parser {
         }
         return startingLine;
     }
+
     private void parseTOC() {
         int tocStart = findTOCIndex();
         int skipped = 0;
@@ -327,12 +356,12 @@ public class Parser {
                 skipped += 1;
                 continue;
             }
-            if (headerFooterLines.contains(line) ||headerFooterLinesExtended.contains(line) || name.contains(line)) {
+            if (headerFooterLines.contains(line) || headerFooterLinesExtended.contains(line) || name.contains(line)) {
                 continue;
             }
             char ch = line.charAt(0);
-            if (!Character.isDigit(ch)){
-                if ((Character.isUpperCase(ch) && Character.isAlphabetic(line.charAt(1)))){
+            if (!Character.isDigit(ch)) {
+                if ((Character.isUpperCase(ch) && Character.isAlphabetic(line.charAt(1)))) {
                     needEmpty = true;
                 }
             }
@@ -348,7 +377,7 @@ public class Parser {
             } else {
                 for (int j = 1; j < tmpList.size() - 1; j++) { //Join back the initial numbers.
                     ch = tmpList.get(j).charAt(0);
-                    if (Character.isDigit(ch)){
+                    if (Character.isDigit(ch)) {
                         needSpace = false;
                         tmpString = tmpString.concat(".").concat(tmpList.get(j));
                     }
@@ -356,7 +385,7 @@ public class Parser {
                 splitLine.add(tmpString);
             }
             tmpString = "";
-            while(k < tmpList.size() - 1) { //Join back text.
+            while (k < tmpList.size() - 1) { //Join back text.
                 if (needSpace) {
                     tmpString = tmpString.concat(" ");
                 }
@@ -369,7 +398,7 @@ public class Parser {
                 ++k;
             }
             splitLine.add(tmpString);
-            splitLine.add(tmpList.get(tmpList.size()-1));
+            splitLine.add(tmpList.get(tmpList.size() - 1));
             tocLines.add(splitLine);
         }
     }
@@ -380,7 +409,7 @@ public class Parser {
                 for (int j = 0; j < 4; j++) {
                     if (headerFooterLines.contains(lines.get(j))) {
                         titleProbability++;
-                    } else{
+                    } else {
                         headerFooterLines.add(lines.get(j));
                     }
                 }
@@ -392,6 +421,4 @@ public class Parser {
             }
         }
     }
-
-
 }
