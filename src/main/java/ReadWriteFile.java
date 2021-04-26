@@ -40,9 +40,9 @@ public class ReadWriteFile {
         String fileLocation = "";
         try {
             file = new FileWriter("output/" + nameOfFile);
+            file.write(obj);
             File f = new File(nameOfFile);
             fileLocation = "File is located in: " + f.getAbsolutePath() + "\n";
-            file.write(obj);
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             System.out.println("Writing to file has failed !");

@@ -34,6 +34,7 @@ public class Parser {
     private HashSet<String> desVersions = new HashSet<>();
     private HashSet<String> eccVersions = new HashSet<>();
     private HashSet<String> rsaVersions = new HashSet<>();
+    private String finalString = new String();
     private int parsingOption;
 
 
@@ -66,7 +67,8 @@ public class Parser {
                 break;
             default:
         }
-        return makeJsonStructure().toString(4);
+        finalString =  makeJsonStructure().toString(4);
+        return finalString;
     }
 
     private void parseVersions() {
@@ -347,7 +349,6 @@ public class Parser {
         int skipped = 0;
         for (int i = tocStart; i < lines.size(); i++) {
             boolean needEmpty = false;
-            boolean needSpace = false;
             if (skipped > 6) {
                 break;
             }
@@ -357,12 +358,12 @@ public class Parser {
                 continue;
             }
             if (headerFooterLines.contains(line) ||
-                headerFooterLinesExtended.contains(line) ||
-                name.contains(line) ||
-                line.contains("Page:") ||
-                line.contains("BSI-DSZ-CC") ||
-                (Character.isDigit(line.charAt(0)) && line.contains("/")) ||
-                line.contains("www"))
+                    headerFooterLinesExtended.contains(line) ||
+                    name.contains(line) ||
+                    line.contains("Page:") ||
+                    line.contains("BSI-DSZ-CC") ||
+                    (Character.isDigit(line.charAt(0)) && line.contains("/")) ||
+                    line.contains("www"))
             {
                 continue;
             }
@@ -375,42 +376,47 @@ public class Parser {
             List<String> tmpList = new ArrayList<String>(Arrays.asList(line.trim().split("[.\\s+]"))); //Remove dots and spaces
             tmpList.removeAll(Arrays.asList(""));
             List<String> splitLine = new ArrayList<String>();
-            String tmpString = tmpList.get(0);
             if (!Character.isDigit(tmpList.get(tmpList.size() - 1).charAt(0))) {
                 continue;
             }
-            int k = 1;
-            if (needEmpty) {
-                splitLine.add("");
-                k = 0;
-                needSpace = false;
-            } else {
-                for (int j = 1; j < tmpList.size() - 1; j++) { //Join back the initial numbers.
-                    ch = tmpList.get(j).charAt(0);
-                    if (Character.isDigit(ch)) {
-                        needSpace = false;
-                        tmpString = tmpString.concat(".").concat(tmpList.get(j));
-                    }
+            parseToCLine(tmpList, splitLine, needEmpty, false);
+        }
+    }
+
+    private void parseToCLine(List<String> tmpList, List<String> splitLine, boolean needEmpty, boolean needSpace ) {
+        String tmpString = tmpList.get(0);
+        int k = 1;
+        if (needEmpty) {
+            splitLine.add("");
+            k = 0;
+            needSpace = false;
+        } else {
+            for (int j = 1; j < tmpList.size() - 1; j++) { //Join back the initial numbers.
+                char ch = tmpList.get(j).charAt(0);
+                if (Character.isDigit(ch)) {
+                    needSpace = false;
+                    tmpString = tmpString.concat(".").concat(tmpList.get(j));
                 }
-                splitLine.add(tmpString);
-            }
-            tmpString = "";
-            while (k < tmpList.size() - 1) { //Join back text.
-                if (needSpace) {
-                    tmpString = tmpString.concat(" ");
-                }
-                String tmpLine = tmpList.get(k);
-                ch = tmpLine.charAt(0);
-                if (!Character.isDigit(ch)) {
-                    tmpString = tmpString.concat(tmpLine);
-                    needSpace = true;
-                }
-                ++k;
             }
             splitLine.add(tmpString);
-            splitLine.add(tmpList.get(tmpList.size() - 1));
-            tocLines.add(splitLine);
         }
+        tmpString = "";
+        while (k < tmpList.size() - 1) { //Join back text.
+            if (needSpace) {
+                tmpString = tmpString.concat(" ");
+            }
+            String tmpLine = tmpList.get(k);
+            char ch = tmpLine.charAt(0);
+            if (!Character.isDigit(ch)) {
+                tmpString = tmpString.concat(tmpLine);
+                needSpace = true;
+            }
+            ++k;
+        }
+        splitLine.add(tmpString);
+        splitLine.add(tmpList.get(tmpList.size() - 1));
+        tocLines.add(splitLine);
+
     }
 
     private void findHeaderFooter() {

@@ -15,7 +15,7 @@ public class ProjectMainClass {
             switch (option) {
                 case 0:
                     run = 0;
-                    System.out.print("Java Parser Project will be terminated!\nGoodbye!");
+                    System.out.print("Java Parser Project will be terminated!\nGoodbye!\n");
                     break;
                 case 1:
                     ui.parsingOption();
