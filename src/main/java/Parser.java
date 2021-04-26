@@ -1,4 +1,3 @@
-import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,13 +34,27 @@ public class Parser {
     private HashSet<String> desVersions = new HashSet<>();
     private HashSet<String> eccVersions = new HashSet<>();
     private HashSet<String> rsaVersions = new HashSet<>();
+    private int parsingOption;
 
 
-    public JSONObject parsing(ArrayList<String> linesFromFile) throws JSONException {
+    public JSONObject parsing(ArrayList<String> linesFromFile, int option) throws JSONException {
         if (linesFromFile.isEmpty()) {
             return new JSONObject();
         }
         lines = linesFromFile;
+        parsingOption = option;
+        switch (parsingOption)
+        {
+            case 1:
+                parseEverything();
+        }
+
+        return makeJsonStructure();
+    }
+
+    public void parseEverything()
+    {
+        findName();
         findHeaderFooter();
         parseReferences();
         findVersions(ealOptions, ealVersions);
@@ -52,10 +65,7 @@ public class Parser {
         findVersions(eccOptions, eccVersions);
         findVersions(rsaOptions, rsaVersions);
         findRevisions();
-        findName();
         parseTOC();
-
-        return makeJsonStructure();
     }
 
     private void findRevisions(){

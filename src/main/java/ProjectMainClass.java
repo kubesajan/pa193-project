@@ -18,12 +18,15 @@ public class ProjectMainClass {
                     System.out.print("Java Parser Project will be terminated!\nGoodbye!");
                     break;
                 case 1:
+                    ui.parsingOption();
                     ui.parseAllInInputFolder();
                     break;
                 case 2:
+                    ui.parsingOption();
                     ui.parseOneInInputFolder();
                     break;
                 case 3:
+                    ui.parsingOption();
                     ui.parseOneSpecifiedByPath();
                     break;
                 default:

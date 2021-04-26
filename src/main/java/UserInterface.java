@@ -9,6 +9,7 @@ public class UserInterface {
     private ReadWriteFile readWriteFile = new ReadWriteFile();
     private ArrayList<String> allFilesNames = new ArrayList<>();
     private int userInputInt;
+    private int parsingOption;
     private String userInputString;
 
 
@@ -16,6 +17,18 @@ public class UserInterface {
         System.out.print("Please choose one option.\n");
         System.out.print("1 - Parse all json files in input folder\n2 - Parse particular file in input folder\n3 - Parse particular file specified by path\n0 - Quit\n\n");
         System.out.print("Your option: ");
+    }
+
+    public void parsingOption() {
+        System.out.print("\nSelect what you want to parse.\n\n");
+        System.out.print("1 - Parse everything (Title, versions, table of contents, revisions and bibliography)\n2 - Table of contents\n3 - Bibliography\n4 - Versions\n5 - Revisions\n\nRemark: Title is always parsed.\n\n");
+        System.out.print("Your option: ");
+        parsingOption = getUserInputInt();
+        while (parsingOption < 1 || parsingOption > 5) {
+            System.out.print("\nIncorrect option!");
+            System.out.print("\nYour input: ");
+            parsingOption = getUserInputInt();
+        }
     }
 
     public int getUserInputInt() {
@@ -42,7 +55,7 @@ public class UserInterface {
         for (int i = 0; i < allFilesNames.size(); i++) {
             System.out.println(i + 1);
             parser = new Parser();
-            readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(allFilesNames.get(i), "input/")), allFilesNames.get(i));
+            readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(allFilesNames.get(i), "input/"), parsingOption), allFilesNames.get(i));
         }
     }
 
@@ -63,7 +76,7 @@ public class UserInterface {
         }
         String nameOfFile = allFilesNames.get(userInputInt - 1);
         clearConsole();
-        readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, "input/")), nameOfFile);
+        readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, "input/"), parsingOption), nameOfFile);
     }
 
     public void parseOneSpecifiedByPath() {
@@ -82,7 +95,7 @@ public class UserInterface {
         System.out.print("\ne.g. of file path: C:/Users/computer/Desktop/ ");
         System.out.print("\nPlease specify absolut path of file: ");
         String path = getUserInputString();
-        readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, path)), nameOfFile);
+        readWriteFile.writeToFile(parser.parsing(readWriteFile.readFile(nameOfFile, path), parsingOption), nameOfFile);
     }
 
     public boolean getFileNames() {
