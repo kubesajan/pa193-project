@@ -1,19 +1,16 @@
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
 import java.util.ArrayList;
 
 public class ReadWriteFile {
-    private ArrayList<String> lines = new ArrayList<>();
-    private ArrayList<String> allFilesNames = new ArrayList<>();
     private ArrayList<String> wrongFilesNames = new ArrayList<>();
     private static FileWriter file;
 
     public ArrayList<String> readFile(String nameOfFile, String path) {
         BufferedReader reader;
-        lines = new ArrayList<>();
+        ArrayList<String> lines = new ArrayList<>();
         try {
             reader = new BufferedReader(new FileReader(
                     path + nameOfFile));
@@ -64,14 +61,14 @@ public class ReadWriteFile {
     }
 
     public ArrayList<String> getAllFilesNames() {
-        allFilesNames = new ArrayList<>();
+        ArrayList<String> allFilesNames = new ArrayList<>();
         File folder = new File("input");
         File[] listOfFiles = folder.listFiles();
         String fileExtension;
         String fileName;
 
         if (listOfFiles == null) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
         for (File file : listOfFiles) {
             if (file.isFile()) {
