@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class TocParser {
@@ -38,9 +39,9 @@ public class TocParser {
                     needEmpty = true;
                 }
             }
-            List<String> tmpList = new ArrayList<String>(Arrays.asList(line.trim().split("[.\\s+]"))); //Remove dots and spaces
-            tmpList.removeAll(Arrays.asList(""));
-            List<String> splitLine = new ArrayList<String>();
+            List<String> tmpList = new ArrayList<>(Arrays.asList(line.trim().split("[.\\s+]"))); //Remove dots and spaces
+            tmpList.removeAll(Collections.singletonList(""));
+            List<String> splitLine = new ArrayList<>();
             if (!Character.isDigit(tmpList.get(tmpList.size() - 1).charAt(0))) {
                 continue;
             }
@@ -85,7 +86,7 @@ public class TocParser {
 
     private int findTOCIndex(ArrayList<String> lines) {
         int startingLine = 0;
-        char ch = (char) 0;
+        char ch;
         for (int i = 0; i < lines.size(); i++) {
             if (lines.get(i).toLowerCase().contains("content") && startingLine == 0) {
                 for (int j = i + 1; j < i + 3; j++) {

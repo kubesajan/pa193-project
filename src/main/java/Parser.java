@@ -3,24 +3,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 public class Parser {
-    private VersionsParser verParser = new VersionsParser();
-    private NameParser nameParser = new NameParser();
-    private BibliographyParser bibParser = new BibliographyParser();
-    private RevisionsParser revParser = new RevisionsParser();
-    private TocParser tocParser = new TocParser();
+    private final VersionsParser verParser = new VersionsParser();
+    private final NameParser nameParser = new NameParser();
+    private final BibliographyParser bibParser = new BibliographyParser();
+    private final RevisionsParser revParser = new RevisionsParser();
+    private final TocParser tocParser = new TocParser();
     private JSONObject jsonObject = new JSONObject();
     private ArrayList<String> lines = new ArrayList<>();
-    private String finalString = new String();
     private int parsingOption;
 
 
     public String parsing(ArrayList<String> linesFromFile, int option) throws JSONException {
         if (linesFromFile.isEmpty()) {
-            return new String();
+            return "";
         }
         lines = linesFromFile;
         parsingOption = option;
@@ -47,8 +45,7 @@ public class Parser {
                 break;
             default:
         }
-        finalString = makeJsonStructure().toString(4);
-        return finalString;
+        return makeJsonStructure().toString(4);
     }
 
     private void parseVersions() {
@@ -64,24 +61,16 @@ public class Parser {
     private JSONObject makeJsonStructure() throws JSONException {
         jsonObject.put("title", nameParser.getName());
         switch (parsingOption) {
-            case 1:
+            case 1 -> {
                 makeTableOfContentsJSON();
                 makeBibliographyJSON();
                 makeVersionsJSON();
                 makeRevisionsJSON();
-                break;
-            case 2:
-                makeTableOfContentsJSON();
-                break;
-            case 3:
-                makeBibliographyJSON();
-                break;
-            case 4:
-                makeVersionsJSON();
-                break;
-            case 5:
-                makeRevisionsJSON();
-                break;
+            }
+            case 2 -> makeTableOfContentsJSON();
+            case 3 -> makeBibliographyJSON();
+            case 4 -> makeVersionsJSON();
+            case 5 -> makeRevisionsJSON();
         }
 
         return jsonObject;
@@ -104,13 +93,20 @@ public class Parser {
     private void makeVersionsJSON() {
 
         JSONObject versions = new JSONObject();
-        versions.put("eal", verParser.getEalVersions());
-        versions.put("global_platform", new JSONArray(verParser.getGpVersions()));
-        versions.put("java_card", new JSONArray(verParser.getJavaVersions()));
-        versions.put("sha", new JSONArray(verParser.getShaVersions()));
-        versions.put("rsa", new JSONArray(verParser.getRsaVersions()));
-        versions.put("ecc", new JSONArray(verParser.getEccVersions()));
-        versions.put("des", new JSONArray(verParser.getDesVersions()));
+        if (!verParser.getEalVersions().isEmpty())
+            versions.put("eal", verParser.getEalVersions());
+        if (!verParser.getGpVersions().isEmpty())
+            versions.put("global_platform", new JSONArray(verParser.getGpVersions()));
+        if (!verParser.getJavaVersions().isEmpty())
+            versions.put("java_card", new JSONArray(verParser.getJavaVersions()));
+        if (!verParser.getShaVersions().isEmpty())
+            versions.put("sha", new JSONArray(verParser.getShaVersions()));
+        if (!verParser.getRsaVersions().isEmpty())
+            versions.put("rsa", new JSONArray(verParser.getRsaVersions()));
+        if (!verParser.getEccVersions().isEmpty())
+            versions.put("ecc", new JSONArray(verParser.getEccVersions()));
+        if (!verParser.getDesVersions().isEmpty())
+            versions.put("des", new JSONArray(verParser.getDesVersions()));
         jsonObject.put("versions", versions);
     }
 

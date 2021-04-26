@@ -5,9 +5,17 @@ public class RevisionsParser {
     private ArrayList<String> revisionDates = new ArrayList<>();
     private ArrayList<String> revisionDescriptions = new ArrayList<>();
 
-    public ArrayList<String> getRevisionVersions() { return this.revisionVersions; }
-    public ArrayList<String> getRevisionDates() { return this.revisionDates; }
-    public ArrayList<String> getRevisionDescriptions() { return this.revisionDescriptions; }
+    public ArrayList<String> getRevisionVersions() {
+        return this.revisionVersions;
+    }
+
+    public ArrayList<String> getRevisionDates() {
+        return this.revisionDates;
+    }
+
+    public ArrayList<String> getRevisionDescriptions() {
+        return this.revisionDescriptions;
+    }
 
 
     public void findRevisions(ArrayList<String> lines) {

@@ -6,31 +6,30 @@ public class ProjectMainClass {
     public static void main(String[] args) throws JSONException {
         UserInterface ui = new UserInterface();
         int run = 1;
-        int option = 1;
+        int option;
         System.out.print("***********\n***Hello***\n***********\n\n*******************Welcome to Java Parser Project!*******************\n\n");
         System.out.println("Default Charset=" + Charset.defaultCharset());
         while (run != 0) {
             ui.menuDescription();
             option = ui.getUserInputInt();
             switch (option) {
-                case 0:
+                case 0 -> {
                     run = 0;
                     System.out.print("Java Parser Project will be terminated!\nGoodbye!\n");
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     ui.parsingOption();
                     ui.parseAllInInputFolder();
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     ui.parsingOption();
                     ui.parseOneInInputFolder();
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     ui.parsingOption();
                     ui.parseOneSpecifiedByPath();
-                    break;
-                default:
-                    ui.clearConsole();
+                }
+                default -> ui.clearConsole();
             }
         }
     }

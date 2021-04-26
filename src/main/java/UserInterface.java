@@ -6,12 +6,10 @@ import java.util.Scanner;
 public class UserInterface {
     private Scanner scan = new Scanner(System.in);
     private Parser parser = new Parser();
-    private ReadWriteFile readWriteFile = new ReadWriteFile();
+    private final ReadWriteFile readWriteFile = new ReadWriteFile();
     private ArrayList<String> allFilesNames = new ArrayList<>();
     private int userInputInt;
     private int parsingOption;
-    private String userInputString;
-
 
     public void menuDescription() {
         System.out.print("Please choose one option.\n");
@@ -41,7 +39,7 @@ public class UserInterface {
     }
 
     public String getUserInputString() {
-        userInputString = scan.next();
+        String userInputString = scan.next();
         return userInputString;
 
     }

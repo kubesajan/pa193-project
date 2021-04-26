@@ -6,9 +6,17 @@ public class NameParser {
     private int titleProbability;
     private String name = "";
 
-    public ArrayList<String> getHeaderFooterLines() { return this.headerFooterLines; }
-    public ArrayList<String> getHeaderFooterLinesExtended() { return this.headerFooterLinesExtended; }
-    public String getName() { return this.name; }
+    public ArrayList<String> getHeaderFooterLines() {
+        return this.headerFooterLines;
+    }
+
+    public ArrayList<String> getHeaderFooterLinesExtended() {
+        return this.headerFooterLinesExtended;
+    }
+
+    public String getName() {
+        return this.name;
+    }
 
     public void findHeaderFooter(ArrayList<String> lines) {
         for (int i = 5; i < lines.size(); i++) {
@@ -63,14 +71,12 @@ public class NameParser {
             return;
         }
         if (titleProbability > 4) {
-            for (int i = 0; i < headerFooterLines.size(); i++) {
-                name = name.concat(headerFooterLines.get(i).trim().concat(" "));
+            for (String headerFooterLine : headerFooterLines) {
+                name = name.concat(headerFooterLine.trim().concat(" "));
             }
             return;
         }
-        //this part is buggy, sadly
-        for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
+        for (String line : lines) {
             if (line.contains("Title")) {
                 line = line.replace("Title", "");
                 line = line.trim();

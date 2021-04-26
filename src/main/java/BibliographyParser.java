@@ -2,14 +2,15 @@ import java.util.ArrayList;
 
 public class BibliographyParser {
     private ArrayList<String> bibliographyLines = new ArrayList<>();
-    private int referenceStart;
 
-    public ArrayList<String> getBibliographyLines() { return this.bibliographyLines; }
+    public ArrayList<String> getBibliographyLines() {
+        return this.bibliographyLines;
+    }
 
     public void parseBibliography(ArrayList<String> lines) {
         bibliographyLines = new ArrayList<>();
         boolean refClosed = true;
-        referenceStart = findReferenceIndex(lines);
+        int referenceStart = findReferenceIndex(lines);
         String reference = "";
         int noBrackets = 0;
         for (int i = referenceStart; i < lines.size(); i++) {
