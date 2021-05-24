@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TocParser {
+    public static final int MAX_SKIP = 6;
     private NameParser nameParser = new NameParser();
     private ArrayList<List<String>> tocLines = new ArrayList<>();
 
@@ -16,7 +17,7 @@ public class TocParser {
         int skipped = 0;
         for (int i = tocStart; i < lines.size(); i++) {
             boolean needEmpty = false;
-            if (skipped > 6) {
+            if (skipped > MAX_SKIP) {
                 break;
             }
             String line = lines.get(i).trim();
