@@ -25,21 +25,11 @@ public class TocParser {
                 skipped += 1;
                 continue;
             }
-            if (nameParser.getHeaderFooterLines().contains(line) ||
-                    nameParser.getHeaderFooterLinesExtended().contains(line) ||
-                    nameParser.getName().contains(line) ||
-                    line.contains("Page:") ||
-                    line.contains("BSI-DSZ-CC") ||
-                    (Character.isDigit(line.charAt(0)) && line.contains("/")) ||
-                    line.contains("www")) {
+            if (isMargin(line)) {
                 continue;
             }
             char ch = line.charAt(0);
-            if (!Character.isDigit(ch)) {
-                if ((Character.isUpperCase(ch) && Character.isAlphabetic(line.charAt(1)))) {
-                    needEmpty = true;
-                }
-            }
+            needEmpty = isNeedEmpty(needEmpty, line, ch);
             List<String> tmpList = new ArrayList<>(Arrays.asList(line.trim().split("[.\\s+]"))); //Remove dots and spaces
             tmpList.removeAll(Collections.singletonList(""));
             List<String> splitLine = new ArrayList<>();
@@ -48,6 +38,25 @@ public class TocParser {
             }
             parseToCLine(tmpList, splitLine, needEmpty, false);
         }
+    }
+
+    private boolean isNeedEmpty(boolean needEmpty, String line, char ch) {
+        if (!Character.isDigit(ch)) {
+            if ((Character.isUpperCase(ch) && Character.isAlphabetic(line.charAt(1)))) {
+                needEmpty = true;
+            }
+        }
+        return needEmpty;
+    }
+
+    private boolean isMargin(String line) {
+        return nameParser.getHeaderFooterLines().contains(line) ||
+                nameParser.getHeaderFooterLinesExtended().contains(line) ||
+                nameParser.getName().contains(line) ||
+                line.contains("Page:") ||
+                line.contains("BSI-DSZ-CC") ||
+                (Character.isDigit(line.charAt(0)) && line.contains("/")) ||
+                line.contains("www");
     }
 
     private void parseToCLine(List<String> tmpList, List<String> splitLine, boolean needEmpty, boolean needSpace) {

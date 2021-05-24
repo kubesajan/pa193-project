@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 public class NameParser {
+    public static final int THRESHOLD_TITLE_PROB = 4;
     private ArrayList<String> headerFooterLines = new ArrayList<>();
     private ArrayList<String> headerFooterLinesExtended = new ArrayList<>();
     private int titleProbability;
@@ -29,11 +30,15 @@ public class NameParser {
                     }
                 }
                 for (int j = 4; j < 10; j++) {
-                    if (!headerFooterLinesExtended.contains(lines.get(j))) {
-                        headerFooterLinesExtended.add(lines.get(j));
-                    }
+                    adjustHeaderFooterLinesExtended(lines, j);
                 }
             }
+        }
+    }
+
+    private void adjustHeaderFooterLinesExtended(ArrayList<String> lines, int j) {
+        if (!headerFooterLinesExtended.contains(lines.get(j))) {
+            headerFooterLinesExtended.add(lines.get(j));
         }
     }
 
@@ -70,7 +75,7 @@ public class NameParser {
         if (!name.isEmpty()) {
             return;
         }
-        if (titleProbability > 4) {
+        if (titleProbability > THRESHOLD_TITLE_PROB) {
             for (String headerFooterLine : headerFooterLines) {
                 name = name.concat(headerFooterLine.trim().concat(" "));
             }
