@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TocParser {
+    public static final int MAX_SKIP = 6;
     private NameParser nameParser = new NameParser();
     private ArrayList<List<String>> tocLines = new ArrayList<>();
 
@@ -16,7 +17,7 @@ public class TocParser {
         int skipped = 0;
         for (int i = tocStart; i < lines.size(); i++) {
             boolean needEmpty = false;
-            if (skipped > 6) {
+            if (skipped > MAX_SKIP) {
                 break;
             }
             String line = lines.get(i).trim();
@@ -24,21 +25,11 @@ public class TocParser {
                 skipped += 1;
                 continue;
             }
-            if (nameParser.getHeaderFooterLines().contains(line) ||
-                    nameParser.getHeaderFooterLinesExtended().contains(line) ||
-                    nameParser.getName().contains(line) ||
-                    line.contains("Page:") ||
-                    line.contains("BSI-DSZ-CC") ||
-                    (Character.isDigit(line.charAt(0)) && line.contains("/")) ||
-                    line.contains("www")) {
+            if (isMargin(line)) {
                 continue;
             }
             char ch = line.charAt(0);
-            if (!Character.isDigit(ch)) {
-                if ((Character.isUpperCase(ch) && Character.isAlphabetic(line.charAt(1)))) {
-                    needEmpty = true;
-                }
-            }
+            needEmpty = isNeedEmpty(needEmpty, line, ch);
             List<String> tmpList = new ArrayList<>(Arrays.asList(line.trim().split("[.\\s+]"))); //Remove dots and spaces
             tmpList.removeAll(Collections.singletonList(""));
             List<String> splitLine = new ArrayList<>();
@@ -47,6 +38,25 @@ public class TocParser {
             }
             parseToCLine(tmpList, splitLine, needEmpty, false);
         }
+    }
+
+    private boolean isNeedEmpty(boolean needEmpty, String line, char ch) {
+        if (!Character.isDigit(ch)) {
+            if ((Character.isUpperCase(ch) && Character.isAlphabetic(line.charAt(1)))) {
+                needEmpty = true;
+            }
+        }
+        return needEmpty;
+    }
+
+    private boolean isMargin(String line) {
+        return nameParser.getHeaderFooterLines().contains(line) ||
+                nameParser.getHeaderFooterLinesExtended().contains(line) ||
+                nameParser.getName().contains(line) ||
+                line.contains("Page:") ||
+                line.contains("BSI-DSZ-CC") ||
+                (Character.isDigit(line.charAt(0)) && line.contains("/")) ||
+                line.contains("www");
     }
 
     private void parseToCLine(List<String> tmpList, List<String> splitLine, boolean needEmpty, boolean needSpace) {

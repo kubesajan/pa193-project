@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 public class BibliographyParser {
+    public static final int MAX_NO_BRACKETS = 20;
     private ArrayList<String> bibliographyLines = new ArrayList<>();
 
     public ArrayList<String> getBibliographyLines() {
@@ -19,7 +20,7 @@ public class BibliographyParser {
                 noBrackets = 0;
                 continue;
             }
-            if (noBrackets >= 20) {
+            if (noBrackets >= MAX_NO_BRACKETS) {
                 break;
             }
             if (line.contains("[") && line.contains("]")) {
